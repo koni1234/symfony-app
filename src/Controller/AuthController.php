@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\Input\Login;
+use App\DTO\Input\LoginInput;
+use App\DTO\Output\LoginOutput;
+use App\Manager\LoginManager;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,31 +19,27 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthController extends AbstractController
 {
-    private SerializerInterface $serializer;
-    private ValidatorInterface $validator;
-
-    public function __construct(SerializerInterface $serializer, ValidatorInterface $validator)
+    public function __construct(private SerializerInterface $serializer, private ValidatorInterface $validator, private LoginManager $loginManager)
     {
-        $this->serializer = $serializer;
-        $this->validator = $validator;
     }
 
     #[Route('/api/login', name: 'login', methods: 'POST')]
-    #[OA\Post(requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: Login::class))))]
+    #[OA\Post(requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: LoginInput::class))))]
     #[OA\Response(
         response: 200,
-        description: 'Successful user logged response',
-        content: new Model(type: Login::class)
+        description: 'Return the jwt token',
+        content: new Model(type: LoginOutput::class)
     )]
     public function login(Request $request): Response
     {
-        $dto = $this->serializer->deserialize($request->getContent(), Login::class, 'json');
+        /** @var LoginInput $dto */
+        $dto = $this->serializer->deserialize($request->getContent(), LoginInput::class, 'json');
         $errors = $this->validator->validate($dto);
 
         if ($errors->count() > 0) {
-            throw new ValidationFailedException(Login::class, $errors);
+            throw new ValidationFailedException(LoginInput::class, $errors);
         }
 
-        return $this->json($dto);
+        return $this->json($this->loginManager->login($dto));
     }
 }

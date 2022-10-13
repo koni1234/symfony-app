@@ -6,7 +6,7 @@ namespace App\DTO\Input;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class Login
+final class LoginInput
 {
     #[Assert\NotBlank()]
     public string $email;
