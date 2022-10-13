@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -37,7 +38,7 @@ class AuthController extends AbstractController
         $dto = $this->serializer->deserialize($request->getContent(), Login::class, 'json');
         $errors = $this->validator->validate($dto);
 
-        if ($errors->count() > 0){
+        if ($errors->count() > 0) {
             throw new ValidationFailedException(Login::class, $errors);
         }
 
