@@ -6,10 +6,7 @@ namespace App\DTO\Output;
 
 final class LoginOutput
 {
-    public string $token;
-
-    public function __construct(string $token)
+    public function __construct(public string $email, public string $token)
     {
-        $this->token = $token;
     }
 }
